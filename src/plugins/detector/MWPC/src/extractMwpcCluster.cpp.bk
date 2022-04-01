@@ -1,0 +1,150 @@
+////// To use cut functions of diff vs. sum of XY-total-charge, a full directory should be given since the functions are saved in a root file. Here, the full directory is /home/caot/trek-e36/cooker/src/plugins/detector/MWPC/src/MwpcDiffVsSumTotalChargeCutFunction.root 
+#include <Det_MWPC.h>
+#include <cmath>
+#include <vector>
+#include <fstream>
+#include <iostream>
+#include <TStyle.h>
+#include <sstream>
+#include "TLine.h"
+#include <string>
+#include "TCanvas.h"
+#include "TText.h"
+#include "TLegend.h"
+#include "TLine.h"
+#include "TLatex.h"
+#include "TTree.h"
+#include "TF1.h"
+#include "MwpcPedestalValue.h"
+#include "MwpcClusterThresholdSecondApproach.h"
+#include "MwpcClusterThresholdFromTotalCharge.h"
+using namespace std;
+
+static  TFile *fileCutFunc=new TFile("/home/caot/trek-e36/cooker/src/plugins/detector/MWPC/src/MwpcDiffVsSumTotalChargeCutFunction.root");
+static  TF1 *cutFuncUp[6],*cutFuncLow[6];
+static TH2D *test;
+Long_t Det_MWPC::histos_extractCluster(){
+
+  test=new TH2D("test","test",200,0,5000,200,-1000,1500);
+
+  ostringstream sstr;
+  for(int i=0;i<6;i++){
+    sstr<<"C"<<i/2+2<<(char)((i%2)*6+76)<<"_up";
+    cutFuncUp[i]=(TF1*)fileCutFunc->Get(sstr.str().c_str());
+    sstr.str("");
+    sstr<<"C"<<i/2+2<<(char)((i%2)*6+76)<<"_low";
+    cutFuncLow[i]=(TF1*)fileCutFunc->Get(sstr.str().c_str());
+    sstr.str("");
+  }
+
+  return 0;
+}
+
+Long_t Det_MWPC::startup_extractCluster(){
+  getBranchObject("RawMwpcInfo",(TObject **) &treeRaw);
+  treeCali=0;
+  out->Branch("CaliMwpcInfo",&treeCali,16000,0);
+  gStyle->SetOptStat(0000);
+  gStyle->SetOptFit(1111);
+  return 0;
+};
+
+
+Long_t Det_MWPC::process_extractCluster(){
+  int* data[12]={treeRaw->ADC_C2X_L,treeRaw->ADC_C2X_R,treeRaw->ADC_C2Y_L,treeRaw->ADC_C2Y_R,treeRaw->ADC_C3X_L,treeRaw->ADC_C3X_R,treeRaw->ADC_C3Y_L,treeRaw->ADC_C3Y_R,treeRaw->ADC_C4X_L,treeRaw->ADC_C4X_R,treeRaw->ADC_C4Y_L,treeRaw->ADC_C4Y_R};
+  const double* pedValue[12]={pedValueC2XL,pedValueC2XR,pedValueC2YL,pedValueC2YR,pedValueC3XL,pedValueC3XR,pedValueC3YL,pedValueC3YR,pedValueC4XL,pedValueC4XR,pedValueC4YL,pedValueC4YR};
+  const double* pedSigma[12]={pedSigmaC2XL,pedSigmaC2XR,pedSigmaC2YL,pedSigmaC2YR,pedSigmaC3XL,pedSigmaC3XR,pedSigmaC3YL,pedSigmaC3YR,pedSigmaC4XL,pedSigmaC4XR,pedSigmaC4YL,pedSigmaC4YR}; 
+  const double* totalChargeCut[12]={totChargeCutC2XL,totChargeCutC2XR,totChargeCutC2YL,totChargeCutC2YR,totChargeCutC3XL,totChargeCutC3XR,totChargeCutC3YL,totChargeCutC3YR,totChargeCutC4XL,totChargeCutC4XR,totChargeCutC4YL,totChargeCutC4YR};
+  MwpcEvent *event[12];
+  vector<vector<int> > clusStNum_allcut[12],clusStNum_nocut[12];
+  
+  double *clusTotalCharge_allcut[12],*clusTotalCharge_nosingletcut[12],*clusTotalCharge_nocut[12];
+  for(int i=0;i<12;i++){
+    event[i]=new MwpcEvent(((i%4)/2*(-5)+(i/4)*(!((i%4)/2))+7)*8,!((i/4==0)&&((i%4/2))==0));
+    clusStNum_allcut[i]=event[i]->clusterStripNumber(event[i],data[i],pedValue[i],pedSigma[i],1,totalChargeCut[i],1,singMiniSigmaClusterSecondApproach[i],1,doubMiniSigmaXClusterSecondApproach[i],doubMiniTotalChargeXCluster[i]);
+    clusTotalCharge_allcut[i]=event[i]->getClusterTotCharge(event[i],data[i],pedValue[i],pedSigma[i],1,totalChargeCut[i],1,singMiniSigmaClusterSecondApproach[i],1,doubMiniSigmaXClusterSecondApproach[i],doubMiniTotalChargeXCluster[i]);
+    clusStNum_nocut[i]=event[i]->clusterStripNumber(event[i],data[i],pedValue[i],pedSigma[i],0,totalChargeCut[i],0,singMiniSigmaClusterSecondApproach[i],0,doubMiniSigmaXClusterSecondApproach[i],doubMiniTotalChargeXCluster[i]);
+    clusTotalCharge_nocut[i]=event[i]->getClusterTotCharge(event[i],data[i],pedValue[i],pedSigma[i],0,totalChargeCut[i],0,singMiniSigmaClusterSecondApproach[i],0,doubMiniSigmaXClusterSecondApproach[i],doubMiniTotalChargeXCluster[i]);
+  }
+
+  treeCali->run=treeRaw->run;
+  treeCali->event=treeRaw->event;
+  treeCali->init();
+
+  vector<int> stNumX,stNumY;
+  vector<double> stChargeX,stChargeY;
+
+
+  for(int i=0;i<2;i++){
+    for(int j=0;j<3;j++){
+      treeCali->numClusterXNoCut[2*j+i]=clusStNum_nocut[j*4+i].size();
+      treeCali->numClusterYNoCut[2*j+i]=clusStNum_nocut[j*4+i+2].size();
+      treeCali->numClusterXThresholdTotalChargeCut[2*j+i]=clusStNum_allcut[j*4+i].size();
+      treeCali->numClusterYThresholdTotalChargeCut[2*j+i]=clusStNum_allcut[j*4+i+2].size();
+    }
+
+   int flag=0;
+    for(int j=0;j<6;j++){
+      if(clusStNum_allcut[i+2*j].size()>0) flag++;
+    }
+    if(flag==6){
+      if(i==0) treeCali->leftFlagFirstLayerCut=1;
+      if(i==1) treeCali->rightFlagFirstLayerCut=1;
+      for(int j=0;j<3;j++){
+        treeCali->numClusterXThresholdTotalChargeFlagCut[2*j+i]=clusStNum_allcut[j*4+i].size();
+        treeCali->numClusterYThresholdTotalChargeFlagCut[2*j+i]=clusStNum_allcut[j*4+i+2].size();
+        for(UInt_t m=0;m<treeCali->numClusterXThresholdTotalChargeFlagCut[2*j+i];m++){
+          for(UInt_t n=0;n<treeCali->numClusterYThresholdTotalChargeFlagCut[2*j+i];n++){
+            if(clusTotalCharge_allcut[j*4+i][m]-clusTotalCharge_allcut[j*4+i+2][n]>cutFuncLow[2*j+i]->Eval(clusTotalCharge_allcut[j*4+i][m]+clusTotalCharge_allcut[j*4+i+2][n]) && clusTotalCharge_allcut[j*4+i][m]-clusTotalCharge_allcut[j*4+i+2][n]<cutFuncUp[2*j+i]->Eval(clusTotalCharge_allcut[j*4+i][m]+clusTotalCharge_allcut[j*4+i+2][n])){
+              test->Fill(clusTotalCharge_allcut[j*4+i][m]+clusTotalCharge_allcut[j*4+i+2][n],clusTotalCharge_allcut[j*4+i][m]-clusTotalCharge_allcut[j*4+i+2][n]);        
+              treeCali->pairNum[2*j+i].push_back(m);
+              treeCali->pairNum[2*j+i].push_back(n);
+              treeCali->pairTotalCharge[2*j+i].push_back(clusTotalCharge_allcut[j*4+i][m]);
+              treeCali->pairTotalCharge[2*j+i].push_back(clusTotalCharge_allcut[j*4+i+2][n]);
+
+              stNumX=clusStNum_allcut[j*4+i][m];
+              stNumY=clusStNum_allcut[j*4+i+2][n];
+              stChargeX=event[j*4+i]->getEachClusterStCharge(event[j*4+i],data[j*4+i],pedValue[j*4+i],stNumX);
+              stChargeY=event[j*4+i+2]->getEachClusterStCharge(event[j*4+i+2],data[j*4+i+2],pedValue[j*4+i+2],stNumY);
+
+              treeCali->numSt[2*j+i].push_back(stNumX.size());
+              treeCali->numSt[2*j+i].push_back(stNumY.size());                
+              treeCali->stNum[2*j+i].push_back(stNumX);
+              treeCali->stNum[2*j+i].push_back(stNumY);
+    
+              treeCali->stCharge[2*j+i].push_back(stChargeX);
+              treeCali->stCharge[2*j+i].push_back(stChargeY);
+
+              
+              treeCali->posCentroid[2*j+i].push_back(event[j*4+i]->getEachClusterPositionCentroid(stNumX,stChargeX));
+              treeCali->posCentroid[2*j+i].push_back(event[j*4+i+2]->getEachClusterPositionCentroid(stNumY,stChargeY));
+              treeCali->posErrCentroid[2*j+i].push_back(event[j*4+i]->getEachClusterPositionErrorCentroid(stChargeX));
+              treeCali->posErrCentroid[2*j+i].push_back(event[j*4+i+2]->getEachClusterPositionErrorCentroid(stChargeY));
+   
+              stNumX.clear();
+              stNumY.clear();
+              stChargeX.clear();
+              stChargeY.clear();
+            }
+          }
+        }
+      treeCali->numPair[2*j+i]=treeCali->pairNum[2*j+i].size()/2;
+      if(treeCali->numPair[2*j+i]!=0) treeCali->pairFlag[2*j+i]=1;
+      else treeCali->pairFlag[2*j+i]=0; 
+      }
+    }
+  }
+  if(treeCali->pairFlag[0]==1 && treeCali->pairFlag[2]==1 && treeCali->pairFlag[4]==1) treeCali->leftFlagSecondLayerCut=1;
+  if(treeCali->pairFlag[1]==1 && treeCali->pairFlag[3]==1 && treeCali->pairFlag[5]==1) treeCali->rightFlagSecondLayerCut=1;
+ 
+  return 0;
+}
+
+Long_t Det_MWPC::done_extractCluster(){
+  TCanvas *canv=new TCanvas("test","test",1000,600);
+  gPad->SetLogz();
+  test->Draw("colz");  
+  canv->SaveAs("test.pdf");
+  return 0;
+};
+

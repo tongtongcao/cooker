@@ -1,0 +1,92 @@
+#include <Det_ToF1.h>
+
+#include<cmath>
+
+#include <fstream>
+#include <iostream>
+#include <TStyle.h>
+using namespace std;
+
+Det_ToF1::Det_ToF1(TTree *in_,TTree *out_,TFile *inf_, TFile * outf_,TObject *p_):Plugin(in_,out_,inf_,outf_,p_)
+{
+  // Set defaults for various options
+  treeCali=0;
+};
+
+
+Det_ToF1::~Det_ToF1()
+{
+};
+
+Long_t Det_ToF1::histos()
+{
+  for(int i=0;i<12;i++){
+    string name("AdcVSTdc_u");
+    name+=(i+1)/10+'0';
+    name+=(i+1)%10+'0';
+    name+="_tof1";
+    string title("Adc VS Tdc for tof1 u");
+    title+=(i+1)/10+'0';
+    title+=(i+1)%10+'0';
+    title+=";TDC;ADC";
+    h2AdcVSTdc_u[i]=dH2(name.c_str(),title.c_str(),100,0,1000,150,0,1500);
+
+    name=string("AdcVSTdc_d");
+    name+=(i+1)/10+'0';
+    name+=(i+1)%10+'0';
+    name+="_tof1";
+    title=string("Adc VS Tdc for tof1 d");
+    title+=(i+1)/10+'0';
+    title+=(i+1)%10+'0';
+    title+=";TDC;ADC";
+    h2AdcVSTdc_d[i]=dH2(name.c_str(),title.c_str(),100,0,1000,150,0,1500);
+
+  }
+  return 0;
+
+}
+
+Long_t Det_ToF1::startup()
+{
+  getBranchObject("RawTof1Info",(TObject **) &treeRaw);
+  getBranchObject("RawBeamInfo",(TObject **) &treeBeam);
+  gStyle->SetOptStat(0);
+
+  return 0;
+};
+
+
+Long_t Det_ToF1::process()
+{
+  for(int i=0;i<12;i++){
+    h2AdcVSTdc_u[i]->Fill(treeRaw->TDC_TOF1U[i],treeRaw->ADC_TOF1U[i]);
+    h2AdcVSTdc_d[i]->Fill(treeRaw->TDC_TOF1D[i],treeRaw->ADC_TOF1D[i]);
+  }
+  cout<<treeBeam->TDC_Trig[0].size()<<endl;  
+  return 0;
+};
+
+
+Long_t Det_ToF1::done()
+{
+  return 0;
+};
+
+Long_t Det_ToF1::cmdline(char *cmd)
+{
+  //add cmdline hanling here
+
+  return 0; // 0 = all ok
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////// 
+
+extern "C"{
+  Plugin *factory(TTree *in_, TTree *out_, TFile *inf_, TFile * outf_,TObject *p_)
+  {
+      return (Plugin *) new Det_ToF1(in_,out_,inf_,outf_,p_);
+  }
+}
+
+
+ClassImp(Det_ToF1);

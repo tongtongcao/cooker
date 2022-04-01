@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cooker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation='recipe.xsd'>
+
+<init>/${HOME}/.cooker/shared/init/demo.xml</init>
+
+<source>CookedPgC:CookedAc:anaVar:tofVar</source> <!-- the source tree name-->
+<destination>Tof_M2</destination> <!-- the destination tree name-->
+
+<plugins>
+  <plugin>
+    <name>Tof_M2</name>
+    <file>libTof_M2</file>
+  </plugin>
+</plugins>
+
+<defineHistograms>
+ <Tof_M2>histos</Tof_M2>
+</defineHistograms>
+<!-- These functions will be called at the beginning --> 
+<startup>
+ <Tof_M2>startup</Tof_M2>
+</startup>
+
+<!-- These functions will be executed for every event, in order of appearance -->
+<execute>
+ <Tof_M2>process</Tof_M2>
+</execute>
+
+<!-- These functions will be called at the end of the file -->
+<finalize>
+ <Tof_M2>done</Tof_M2>
+</finalize>
+
+
+</cooker>

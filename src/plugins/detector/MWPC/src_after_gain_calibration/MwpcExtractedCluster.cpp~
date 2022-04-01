@@ -1,0 +1,23 @@
+#include "MwpcExtractedCluster.h"
+void MwpcExtractedCluster::clearVector(){
+  for(int i=0;i<6;i++){
+    pairNum[i].clear();
+    numSt[i].clear();
+    stNum[i].clear();
+    stCharge[i].clear();
+    posCentroid[i].clear();
+    posErrCentroid[i].clear();
+  }
+}
+
+MwpcExtractedCluster::MwpcExtractedCluster(){
+  for(int i=0;i<6;i++){
+    numClusterXThresholdTotalChargeFlagCut[i]=0;
+    numClusterYThresholdTotalChargeFlagCut[i]=0;
+    numPair[i]=0;
+    pairFlag[i]=0;
+  }
+}
+
+MwpcExtractedCluster::~MwpcExtractedCluster(){}
+ClassImp(MwpcExtractedCluster);

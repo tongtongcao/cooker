@@ -1,0 +1,377 @@
+#include <Det_MWPC.h>
+#include <cmath>
+#include <vector>
+#include <fstream>
+#include <iostream>
+#include <TStyle.h>
+#include <sstream>
+#include "TLine.h"
+#include <string>
+#include "TH1D.h"
+#include "TCanvas.h"
+#include "TText.h"
+#include "TLegend.h"
+#include "TLine.h"
+#include "TLatex.h"
+#include "TTree.h"
+#include "TF1.h"
+using namespace std;
+static int X1Y2Com0[6]={0},X1Y2Com1[6]={0},X1Y2Com2[6]={0};
+static int X2Y1Com0[6]={0},X2Y1Com1[6]={0},X2Y1Com2[6]={0};
+static int X2Y2Com0[6]={0},X2Y2Com1[6]={0},X2Y2Com2_1V1[6]={0},X2Y2Com2_1V2[6]={0},X2Y2Com3[6]={0},X2Y2Com4[6]={0};
+static int X1Y2Tot[6]={0},X2Y1Tot[6]={0},X2Y2Tot[6]={0};
+static TH1D *histX1Y2[6],*histX2Y1[6],*histX2Y2[6];
+
+
+static int numEventOrig[12]={0},numEventPed[12]={0},numEventThTC[12]={0},numEventFlag[12]={0},numEventShar[12]={0},numEventPair[12]={0};
+static int numEventLeftFirst=0,numEventRightFirst=0,numEventBothFirst=0;
+static int numEventLeftSecond=0,numEventRightSecond=0,numEventBothSecond=0;
+
+static TH1D *histNumPair[6];
+
+static TH1D *histPosCentroid[12];
+static TH1D *histPosErrCentroid[12];
+
+Long_t Det_MWPC::histos_analysisExtractedCluster(){
+  ostringstream sstr_name,sstr_title;
+  for(int i=0;i<6;i++){
+   sstr_name<<"Pair distribution for X1Y2 "<<"MwpcC"<<i/2+2<<(char)((i%2)*6+76);
+   sstr_title<<sstr_name.str()<<";Combo-Type;Occupation (%)";
+   histX1Y2[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),3,-0.5,2.5);
+   sstr_name.str("");
+   sstr_title.str("");
+
+   sstr_name<<"Pair distribution for X2Y1 "<<"MwpcC"<<i/2+2<<(char)((i%2)*6+76);
+   sstr_title<<sstr_name.str()<<";Combo-Type;Occupation (%)";
+   histX2Y1[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),3,-0.5,2.5);
+   sstr_name.str("");
+   sstr_title.str("");
+
+   sstr_name<<"Pair distribution for X2Y2 "<<"MwpcC"<<i/2+2<<(char)((i%2)*6+76);
+   sstr_title<<sstr_name.str()<<";Combo-Type;Occupation (%)";
+   histX2Y2[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),6,-0.5,5.5);
+   sstr_name.str("");
+   sstr_title.str("");
+
+   sstr_name<<"Number of pair distribution for MwpcC"<<i/2+2<<(char)((i%2)*6+76);
+   sstr_title<<sstr_name.str()<<";Number of pairs;Counts";
+   histNumPair[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),8,0.5,8.5);
+   sstr_name.str("");
+   sstr_title.str("");
+  }
+
+  for(int i=0;i<12;i++){
+    sstr_name<<"Distribution of position determined by the centroid method for "<<"MwpcC"<<i/4+2<<(char)((i%4)/2+88)<<(char)((i%4%2)*6+76);
+    sstr_title<<sstr_name.str()<<";Position; Counts";
+    histPosCentroid[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),((i%4)/2*(-5)+(i/4)*(!((i%4)/2))+7)*8,0,((i%4)/2*(-5)+(i/4)*(!((i%4)/2))+7)*8);
+    sstr_name.str("");
+    sstr_title.str("");
+
+    sstr_name<<"Distribution of position error determined by the centroid method for "<<"MwpcC"<<i/4+2<<(char)((i%4)/2+88)<<(char)((i%4%2)*6+76);
+    sstr_title<<sstr_name.str()<<";Position Error; Counts";
+    histPosErrCentroid[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),100,0,0.5);
+    sstr_name.str("");
+    sstr_title.str("");
+  }
+  return 0;
+}
+
+Long_t Det_MWPC::startup_analysisExtractedCluster(){
+  getBranchObject("CaliMwpcInfo",(TObject **) &treeCali);
+  gStyle->SetOptStat(0000);
+  gStyle->SetOptFit(1111);
+
+  return 0;
+};
+
+
+Long_t Det_MWPC::process_analysisExtractedCluster(){
+  for(int i=0;i<12;i++){
+    numEventOrig[i]++;
+  }
+  for(int i=0;i<6;i++){
+    if(treeCali->numClusterXNoCut[i]!=0) numEventPed[i/2*4+i%2]++;
+    if(treeCali->numClusterYNoCut[i]!=0) numEventPed[i/2*4+i%2+2]++;
+    if(treeCali->numClusterXThresholdTotalChargeCut[i]!=0) numEventThTC[i/2*4+i%2]++;
+    if(treeCali->numClusterYThresholdTotalChargeCut[i]!=0) numEventThTC[i/2*4+i%2+2]++;
+    if(treeCali->numClusterXThresholdTotalChargeFlagCut[i]!=0) numEventFlag[i/2*4+i%2]++;
+    if(treeCali->numClusterYThresholdTotalChargeFlagCut[i]!=0) numEventFlag[i/2*4+i%2+2]++;
+    if(treeCali->numPair[i]!=0){
+       numEventShar[i/2*4+i%2]++;
+       numEventShar[i/2*4+i%2+2]++;
+    }
+  }
+  if(treeCali->pairFlag[0]==1 && treeCali->pairFlag[2]==1 && treeCali->pairFlag[4]==1){
+    for(int i=0;i<6;i++){
+      numEventPair[i*2]++;
+    }
+  }
+  if(treeCali->pairFlag[1]!=0 && treeCali->pairFlag[3]!=0 && treeCali->pairFlag[5]!=0){
+    for(int i=0;i<6;i++){
+      numEventPair[i*2+1]++;
+    }
+  }
+
+  if(treeCali->leftFlagFirstLayerCut==1 && treeCali->rightFlagFirstLayerCut==0) numEventLeftFirst++;
+  if(treeCali->leftFlagFirstLayerCut==0 && treeCali->rightFlagFirstLayerCut==1) numEventRightFirst++;
+  if(treeCali->leftFlagFirstLayerCut==1 && treeCali->rightFlagFirstLayerCut==1) numEventBothFirst++;
+
+  if(treeCali->leftFlagSecondLayerCut==1 && treeCali->rightFlagSecondLayerCut==0) numEventLeftSecond++;
+  if(treeCali->leftFlagSecondLayerCut==0 && treeCali->rightFlagSecondLayerCut==1) numEventRightSecond++; 
+  if(treeCali->leftFlagSecondLayerCut==1 && treeCali->rightFlagSecondLayerCut==1) numEventBothSecond++;
+
+  if(treeCali->leftFlagSecondLayerCut==1){
+    for(int i=0;i<3;i++){	
+      histNumPair[2*i]->Fill(treeCali->numPair[2*i]);
+    }
+    for(int i=0;i<3;i++){
+      for(UInt_t j=0;j<treeCali->posCentroid[2*i].size()/2;j++){
+        histPosCentroid[4*i]->Fill(treeCali->posCentroid[2*i][2*j]);
+        histPosCentroid[4*i+2]->Fill(treeCali->posCentroid[2*i][2*j+1]);
+        histPosErrCentroid[4*i]->Fill(treeCali->posErrCentroid[2*i][2*j]);
+        histPosErrCentroid[4*i+2]->Fill(treeCali->posErrCentroid[2*i][2*j+1]);
+      }
+    }
+  }
+
+  if(treeCali->rightFlagSecondLayerCut==1){
+    for(int i=0;i<3;i++){
+      histNumPair[2*i+1]->Fill(treeCali->numPair[2*i+1]);
+    }
+    for(int i=0;i<3;i++){
+      for(UInt_t j=0;j<treeCali->posCentroid[2*i+1].size()/2;j++){
+        histPosCentroid[4*i+1]->Fill(treeCali->posCentroid[2*i+1][2*j]);
+        histPosCentroid[4*i+3]->Fill(treeCali->posCentroid[2*i+1][2*j+1]);
+        histPosErrCentroid[4*i+1]->Fill(treeCali->posErrCentroid[2*i+1][2*j]);
+        histPosErrCentroid[4*i+3]->Fill(treeCali->posErrCentroid[2*i+1][2*j+1]);
+      }
+    }
+  }
+
+  UInt_t numClusterX[6],numClusterY[6],numPair[6];
+  vector<UInt_t> pairNum[6];
+  for(int i=0;i<6;i++){
+    numClusterX[i]=treeCali->numClusterXThresholdTotalChargeFlagCut[i];
+    numClusterY[i]=treeCali->numClusterYThresholdTotalChargeFlagCut[i]; 
+    numPair[i]=treeCali->numPair[i];
+    pairNum[i]=treeCali->pairNum[i];
+  }
+
+  for(int i=0;i<6;i++){
+    if(numClusterX[i]==1 && numClusterY[i]==2){
+      X1Y2Tot[i]++;
+      if(numPair[i]==0) X1Y2Com0[i]++;
+      else if(numPair[i]==1) X1Y2Com1[i]++;
+      else if(numPair[i]==2) X1Y2Com2[i]++;
+    }
+    if(numClusterX[i]==2 && numClusterY[i]==1){
+      X2Y1Tot[i]++;
+      if(numPair[i]==0) X2Y1Com0[i]++;
+      else if(numPair[i]==1) X2Y1Com1[i]++;
+      else if(numPair[i]==2) X2Y1Com2[i]++;
+    }
+    if(numClusterX[i]==2 && numClusterY[i]==2){
+      X2Y2Tot[i]++;
+      if(numPair[i]==0) X2Y2Com0[i]++;
+      else if(numPair[i]==1) X2Y2Com1[i]++;
+      else if(numPair[i]==2 && (pairNum[i][0]!=pairNum[i][2] && pairNum[i][1]!=pairNum[i][3])) X2Y2Com2_1V1[i]++;
+      else if(numPair[i]==2 && (pairNum[i][0]==pairNum[i][2] || pairNum[i][1]==pairNum[i][3])) X2Y2Com2_1V2[i]++;
+      else if(numPair[i]==3) X2Y2Com3[i]++;
+      else if(numPair[i]==4) X2Y2Com4[i]++;
+    }
+  }
+
+  return 0;
+}
+
+Long_t Det_MWPC::done_analysisExtractedCluster(){
+  double X1Y2Occu[6][3],X2Y1Occu[6][3],X2Y2Occu[6][6];
+  for(int i=0;i<6;i++){
+    X1Y2Occu[i][0]=(double)X1Y2Com0[i]/X1Y2Tot[i]*100;
+    X1Y2Occu[i][1]=(double)X1Y2Com1[i]/X1Y2Tot[i]*100;
+    X1Y2Occu[i][2]=(double)X1Y2Com2[i]/X1Y2Tot[i]*100;
+    X2Y1Occu[i][0]=(double)X2Y1Com0[i]/X2Y1Tot[i]*100;
+    X2Y1Occu[i][1]=(double)X2Y1Com1[i]/X2Y1Tot[i]*100;
+    X2Y1Occu[i][2]=(double)X2Y1Com2[i]/X2Y1Tot[i]*100;
+
+    X2Y2Occu[i][0]=(double)X2Y2Com0[i]/X2Y2Tot[i]*100;
+    X2Y2Occu[i][1]=(double)X2Y2Com1[i]/X2Y2Tot[i]*100;
+    X2Y2Occu[i][2]=(double)X2Y2Com2_1V1[i]/X2Y2Tot[i]*100;
+    X2Y2Occu[i][3]=(double)X2Y2Com2_1V2[i]/X2Y2Tot[i]*100;
+    X2Y2Occu[i][4]=(double)X2Y2Com3[i]/X2Y2Tot[i]*100;
+    X2Y2Occu[i][5]=(double)X2Y2Com4[i]/X2Y2Tot[i]*100;
+  }
+
+  for(int i=0;i<6;i++){
+    for(int j=0;j<3;j++){
+      histX1Y2[i]->SetBinContent(j+1, X1Y2Occu[i][j]);
+      histX2Y1[i]->SetBinContent(j+1, X2Y1Occu[i][j]);
+    }
+  } 
+
+  for(int i=0;i<6;i++){
+    for(int j=0;j<6;j++){
+      histX2Y2[i]->SetBinContent(j+1, X2Y2Occu[i][j]);
+    }
+  }
+  
+  TCanvas *canvXY12=new TCanvas("Pair distribution for X1Y2 and X2Y1","Pair distribution for X1Y2 and X2Y1",1000,900);
+  canvXY12->Divide(2,3);
+  for(int i=0;i<6;i++){
+    canvXY12->cd(i+1);
+    histX1Y2[i]->SetMinimum(0);
+    histX1Y2[i]->SetMaximum(100);
+    histX1Y2[i]->SetLineColor(kRed);
+    histX1Y2[i]->Draw();
+    histX2Y1[i]->Draw("same");
+
+    histX1Y2[i]->GetXaxis()->SetLabelOffset(99);
+    double x, y;
+    string type[3]={"0-Pair","1-Pair","2-Pair"};
+    y = gPad->GetUymin() + 10*histX1Y2[i]->GetYaxis()->GetBinWidth(1);
+    TText t;
+    t.SetTextAngle(60);
+    t.SetTextSize(0.06);
+    t.SetTextAlign(33);
+    t.SetTextColor(kRed);
+    for (int j=0;j<3;j++) {
+      x = histX1Y2[j]->GetXaxis()->GetBinCenter(j+1);
+      t.DrawText(x,y,type[j].c_str());
+    }
+  }
+  canvXY12->cd(1);
+  TLegend *legend=new TLegend(0.7,0.7,0.9,0.9);
+  legend->AddEntry(histX1Y2[0],"X1Y2","l");
+  legend->AddEntry(histX2Y1[0],"X2Y1","l");
+  legend->Draw();
+  canvXY12->SaveAs("Pair distribution for X1Y2 and X2Y1.pdf");
+
+  TCanvas *canvX2Y2=new TCanvas("Pair distribution for X2Y2","Pair distribution for X2Y2",1000,900);
+  canvX2Y2->Divide(2,3);
+  for(int i=0;i<6;i++){
+    canvX2Y2->cd(i+1);
+    histX2Y2[i]->SetMinimum(0);
+    histX2Y2[i]->SetMaximum(100);
+    histX2Y2[i]->Draw();
+
+    histX2Y2[i]->GetXaxis()->SetLabelOffset(99);
+    double x, y;
+    string type[6]={"0-Pair","1-Pair","2-Pair-1V1","2-Pair-1V2","3-Pair","4-Pair"};
+    y = gPad->GetUymin() + 20*histX2Y2[i]->GetYaxis()->GetBinWidth(1);
+    TText t;
+    t.SetTextAngle(60);
+    t.SetTextSize(0.06);
+    t.SetTextAlign(33);
+    t.SetTextColor(kRed);
+    for (int j=0;j<6;j++) {
+      x = histX2Y2[j]->GetXaxis()->GetBinCenter(j+1);
+      t.DrawText(x,y,type[j].c_str());
+    }
+  }
+  canvX2Y2->SaveAs("Pair distribution for X2Y2.pdf");
+
+  TH1D *histAvaiEvent[12];
+  stringstream sstr_name, sstr_title;
+  for(int i=0;i<12;i++){
+    sstr_name<<"Available evnets after accumulated cuts for "<<"MwpcC"<<i/4+2<<(char)((i%4)/2+88)<<(char)((i%4%2)*6+76);
+    sstr_title<<sstr_name.str()<<";Accumulated cuts; Percentage (%)";
+    histAvaiEvent[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),6,0,6);
+    sstr_name.str("");
+    sstr_title.str("");
+    histAvaiEvent[i]->SetBinContent(1,(double)numEventOrig[i]/numEventOrig[i]*100);
+    histAvaiEvent[i]->SetBinContent(2,(double)numEventPed[i]/numEventOrig[i]*100);
+    histAvaiEvent[i]->SetBinContent(3,(double)numEventThTC[i]/numEventOrig[i]*100);
+    histAvaiEvent[i]->SetBinContent(4,(double)numEventFlag[i]/numEventOrig[i]*100);
+    histAvaiEvent[i]->SetBinContent(5,(double)numEventShar[i]/numEventOrig[i]*100);
+    histAvaiEvent[i]->SetBinContent(6,(double)numEventPair[i]/numEventOrig[i]*100);
+  }
+ 
+  TCanvas *canvAvaiEvent=new TCanvas("Available events after accumulated cuts","Available events after accumulated cuts",2000,900);
+  canvAvaiEvent->Divide(4,3);
+  for(int i=0;i<12;i++){
+    canvAvaiEvent->cd(i+1);
+    histAvaiEvent[i]->SetMinimum(0);
+    histAvaiEvent[i]->Draw();
+    histAvaiEvent[i]->GetXaxis()->SetLabelOffset(99);
+    double x, y;
+    string type[6]={"Original","Pedestal Suppression","+ Threshold and Total Charge Cuts","+ Flag Cut","+ XY-Charge-Sharing Cut", "+ Pair-Flag Cut"};
+    y = gPad->GetUymin() + 110*histAvaiEvent[i]->GetYaxis()->GetBinWidth(1);
+    TText t;
+    t.SetTextAngle(90);
+    t.SetTextSize(0.06);
+    t.SetTextAlign(33);
+    t.SetTextColor(kRed);
+    for (int j=0;j<6;j++) {
+      x = histAvaiEvent[j]->GetXaxis()->GetBinCenter(j+1);
+      t.DrawText(x,y,type[j].c_str());
+    }
+  }
+  canvAvaiEvent->SaveAs("Available events after accumulated cuts.pdf");
+
+  TH1D *histAvaiEventLeftRightFirstCut=new TH1D("Available events located at left or right or both after the first layer cuts","Available events located at left or right or both after the first layer cuts;L/R;Counts",3,0,3);
+  histAvaiEventLeftRightFirstCut->SetBinContent(1,numEventLeftFirst);
+  histAvaiEventLeftRightFirstCut->SetBinContent(2,numEventRightFirst);
+  histAvaiEventLeftRightFirstCut->SetBinContent(3,numEventBothFirst);
+  TCanvas *canvAvaiEventLeftRightFirstCut=new TCanvas("Available events located at left or right or both after the first layer cuts","Available events located at left or right or both after the first layer cuts",500,300);
+  histAvaiEventLeftRightFirstCut->SetMinimum(0);
+  histAvaiEventLeftRightFirstCut->Draw();
+  histAvaiEventLeftRightFirstCut->GetXaxis()->SetLabelOffset(99);
+  double x, y;
+  string type[3]={"Left","Right","Both"};
+  y = gPad->GetUymin() + 10*histAvaiEventLeftRightFirstCut->GetYaxis()->GetBinWidth(1);
+  TText t;
+  t.SetTextAngle(30);
+  t.SetTextSize(0.06);
+  t.SetTextAlign(33);
+  t.SetTextColor(kRed);
+  for (int j=0;j<3;j++) {
+    x = histAvaiEventLeftRightFirstCut->GetXaxis()->GetBinCenter(j+1);
+    t.DrawText(x,y,type[j].c_str());
+  }
+  canvAvaiEventLeftRightFirstCut->SaveAs("Available events located at left or right or both after the first layer cuts.pdf");
+
+  TH1D *histAvaiEventLeftRightSecondCut=new TH1D("Available events located at left or right or both after the second layer cuts","Available events located at left or right or both after the second layer cuts;L/R;Counts",3,0,3);
+  histAvaiEventLeftRightSecondCut->SetBinContent(1,numEventLeftSecond);
+  histAvaiEventLeftRightSecondCut->SetBinContent(2,numEventRightSecond);
+  histAvaiEventLeftRightSecondCut->SetBinContent(3,numEventBothSecond);
+  TCanvas *canvAvaiEventLeftRightSecondCut=new TCanvas("Available events located at left or right or both after the second layer cuts","Available events located at left or right or both after the second layer cuts",500,300);
+  histAvaiEventLeftRightSecondCut->SetMinimum(0);
+  histAvaiEventLeftRightSecondCut->Draw();
+  histAvaiEventLeftRightSecondCut->GetXaxis()->SetLabelOffset(99);
+  y = gPad->GetUymin() + 10*histAvaiEventLeftRightSecondCut->GetYaxis()->GetBinWidth(1);
+  for (int j=0;j<3;j++) {
+    x = histAvaiEventLeftRightSecondCut->GetXaxis()->GetBinCenter(j+1);
+    t.DrawText(x,y,type[j].c_str());
+  }
+  canvAvaiEventLeftRightSecondCut->SaveAs("Available events located at left or right or both after the second layer cuts.pdf");
+
+  TCanvas *canvNumPair=new TCanvas("Distribution of number of pairs","Distribution of number of pairs",1000,900);
+  canvNumPair->Divide(2,3);
+  for(int i=0;i<6;i++){
+    canvNumPair->cd(i+1);
+    histNumPair[i]->SetMinimum(0);
+    histNumPair[i]->Draw();
+    cout<<(double) histNumPair[i]->GetBinContent(2)/(histNumPair[i]->GetBinContent(2)+histNumPair[i]->GetBinContent(1))<<endl;
+  }
+  canvNumPair->SaveAs("Distribution of number of pairs.pdf");
+
+  TCanvas *canvPosCentroid=new TCanvas("Distribution of position determined by the centroid method","Distribution of position determined by the centroid method",2000,900);
+  canvPosCentroid->Divide(4,3);
+  for(int i=0;i<12;i++){
+    canvPosCentroid->cd(i+1);
+    histPosCentroid[i]->SetMinimum(0);
+    histPosCentroid[i]->Draw();
+  }
+  canvPosCentroid->SaveAs("Distribution of position determined by the centroid method.pdf");
+
+  TCanvas *canvPosErrCentroid=new TCanvas("Distribution of position error determined by the centroid method","Distribution of position error determined by the centroid method",2000,900);
+  canvPosErrCentroid->Divide(4,3);
+  for(int i=0;i<12;i++){
+    canvPosErrCentroid->cd(i+1);
+    histPosErrCentroid[i]->SetMinimum(0);
+    histPosErrCentroid[i]->Draw();
+  }
+  canvPosErrCentroid->SaveAs("Distribution of position error determined by the centroid method.pdf");
+  return 0;
+};
+

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cooker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation='recipe.xsd'>
+<init>/${HOME}/.cooker/shared/init/demo.xml</init>
+
+<source>trackingVar</source> <!-- the source tree name-->
+<destination>CaliEvent</destination> <!-- the destination tree name-->
+
+<plugins>
+  <plugin> 
+     <name>TOF</name>
+     <file>libTOF</file>
+  </plugin>
+
+
+</plugins>
+
+
+<defineHistograms>
+ <TOF>histos</TOF>
+</defineHistograms>
+
+<!-- These functions will be called at the beginning --> 
+<startup>
+ <TOF>startup</TOF>
+</startup>
+
+<!-- These functions will be executed for every event, in order of appearance -->
+<execute>
+ <TOF>process</TOF>
+</execute>
+
+<!-- These functions will be called at the end of the file --> 
+<finalize>
+ <TOF>done</TOF>
+</finalize>
+
+</cooker>

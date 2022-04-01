@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cooker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation='recipe.xsd'>
+
+<init>/${HOME}/.cooker/shared/init/demo.xml</init>
+
+<source>CaliEvent</source> <!-- the source tree name-->
+<destination>AnalysisResults</destination> <!-- the destination tree name-->
+
+<plugins>
+  <plugin> 
+     <name>MWPC</name>
+     <file>libMWPC</file>
+  </plugin>
+
+
+</plugins>
+
+
+<defineHistograms>
+ <MWPC>histos_testGain</MWPC>
+</defineHistograms>
+
+<!-- These functions will be called at the beginning --> 
+<startup>
+ <MWPC>startup_testGain</MWPC>
+</startup>
+
+<!-- These functions will be executed for every event, in order of appearance -->
+<execute>
+ <MWPC>process_testGain</MWPC>
+</execute>
+
+<!-- These functions will be called at the end of the file --> 
+<finalize>
+ <MWPC>done_testGain</MWPC>
+</finalize>
+
+</cooker>

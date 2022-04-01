@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cooker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation='recipe.xsd'>
+
+<init>/${HOME}/.cooker/shared/init/demo.xml</init>
+
+<source>RawEvent</source> <!-- the source tree name-->
+<destination>Pgc_calibS</destination> <!-- the destination tree name-->
+
+<plugins>
+  <plugin> 
+     <name>PgC</name>
+     <file>libPgC</file>
+  </plugin>
+
+
+</plugins>
+
+
+<defineHistograms>
+ <PgC>hist_calibS</PgC>
+</defineHistograms>
+
+<!-- These functions will be called at the beginning --> 
+<startup>
+ <PgC>start_calibS</PgC>
+</startup>
+
+<!-- These functions will be executed for every event, in order of appearance -->
+<execute>
+ <PgC>calib_peakS</PgC>
+</execute>
+
+<!-- These functions will be called at the end of the file --> 
+<finalize>
+ <PgC>done_calibS</PgC>
+</finalize>
+
+</cooker>

@@ -1,0 +1,652 @@
+#include <Det_MWPC.h>
+
+#include <cmath>
+#include <vector>
+#include <fstream>
+#include <iostream>
+#include <TStyle.h>
+#include <sstream>
+#include "TLine.h"
+#include <string>
+#include "TCanvas.h"
+#include "TText.h"
+#include "TLegend.h"
+#include "TLine.h"
+#include "TLatex.h"
+#include "TMarker.h"
+#include "TGraph.h"
+#include "TF1.h"
+#include "MwpcPedestalValue.h"
+#include "MwpcClusterThresholdSecondApproach.h"
+using namespace std;
+
+static TH2D *histMult[12];
+static TH1D *histSing[12];
+static TH1D *histDoub[12];
+static TH1D *histTrip[12];
+static TH1D *histQuar[12];
+static TH1D *histQuin[12];
+static TH1D *histSext[12];
+static TH1D *histSept[12];
+static TH1D *histOcte[12];
+static TH1D *histNone[12];
+static TH1D *histDect[12];
+Long_t Det_MWPC::histos_clusterthresholdfromcharge(){
+  ostringstream sstr_name, sstr_title;
+  for(int i=0;i<12;i++){
+    sstr_name<<"Total charge vs cluster's type for "<<"MwpcC"<<i/4+2<<(char)((i%4)/2+88)<<(char)((i%4%2)*6+76);
+    sstr_title<<sstr_name.str()<<";Cluster's Type;Total charge";
+    histMult[i]=new TH2D(sstr_name.str().c_str(),sstr_title.str().c_str(),10,0.5,10.5,200,0,500);
+    sstr_name.str("");
+    sstr_title.str("");    
+
+    sstr_name<<"Total charge distribution for "<<"MwpcC"<<i/4+2<<(char)((i%4)/2+88)<<(char)((i%4%2)*6+76)<<" for Singlet";
+    sstr_title<<sstr_name.str()<<";Total charge;Counts";
+    histSing[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),100,0,3000);
+    sstr_name.str("");
+    sstr_title.str("");
+
+    sstr_name<<"Total charge distribution for "<<"MwpcC"<<i/4+2<<(char)((i%4)/2+88)<<(char)((i%4%2)*6+76)<<" for Doublet";
+    sstr_title<<sstr_name.str()<<";Total charge;Counts";
+    histDoub[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),100,0,3000);
+    sstr_name.str("");
+    sstr_title.str("");
+
+    sstr_name<<"Total charge distribution for "<<"MwpcC"<<i/4+2<<(char)((i%4)/2+88)<<(char)((i%4%2)*6+76)<<" for Triplet";
+    sstr_title<<sstr_name.str()<<";Total charge;Counts";
+    histTrip[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),100,0,3000);
+    sstr_name.str("");
+    sstr_title.str("");
+
+    sstr_name<<"Total charge distribution for "<<"MwpcC"<<i/4+2<<(char)((i%4)/2+88)<<(char)((i%4%2)*6+76)<<" for Quartet";
+    sstr_title<<sstr_name.str()<<";Total charge;Counts";
+    histQuar[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),100,0,3000);
+    sstr_name.str("");
+    sstr_title.str("");
+
+    sstr_name<<"Total charge distribution for "<<"MwpcC"<<i/4+2<<(char)((i%4)/2+88)<<(char)((i%4%2)*6+76)<<" for Quintet";
+    sstr_title<<sstr_name.str()<<";Total charge;Counts";
+    histQuin[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),100,0,3000);
+    sstr_name.str("");
+    sstr_title.str("");
+ 
+    sstr_name<<"Total charge distribution for "<<"MwpcC"<<i/4+2<<(char)((i%4)/2+88)<<(char)((i%4%2)*6+76)<<" for Sextet";
+    sstr_title<<sstr_name.str()<<";Total charge;Counts";
+    histSext[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),100,0,3000);
+    sstr_name.str("");
+    sstr_title.str("");
+
+    sstr_name<<"Total charge distribution for "<<"MwpcC"<<i/4+2<<(char)((i%4)/2+88)<<(char)((i%4%2)*6+76)<<" for Septet";
+    sstr_title<<sstr_name.str()<<";Total charge;Counts";
+    histSept[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),100,0,3000);
+    sstr_name.str("");
+    sstr_title.str("");
+
+    sstr_name<<"Total charge distribution for "<<"MwpcC"<<i/4+2<<(char)((i%4)/2+88)<<(char)((i%4%2)*6+76)<<" for Octet";
+    sstr_title<<sstr_name.str()<<";Total charge;Counts";
+    histOcte[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),100,0,3000);
+    sstr_name.str("");
+    sstr_title.str("");
+
+    sstr_name<<"Total charge distribution for "<<"MwpcC"<<i/4+2<<(char)((i%4)/2+88)<<(char)((i%4%2)*6+76)<<" for Nonet";
+    sstr_title<<sstr_name.str()<<";Total charge;Counts";
+    histNone[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),100,0,3000);
+    sstr_name.str("");
+    sstr_title.str("");
+
+    sstr_name<<"Total charge distribution for "<<"MwpcC"<<i/4+2<<(char)((i%4)/2+88)<<(char)((i%4%2)*6+76)<<" for Dectet";
+    sstr_title<<sstr_name.str()<<";Total charge;Counts";
+    histDect[i]=new TH1D(sstr_name.str().c_str(),sstr_title.str().c_str(),100,0,3000);
+    sstr_name.str("");
+    sstr_title.str("");
+  }
+
+  return 0;
+}
+
+Long_t Det_MWPC::startup_clusterthresholdfromcharge(){
+  getBranchObject("RawMwpcInfo",(TObject **) &treeRaw);
+  gStyle->SetOptStat(0000);
+  gStyle->SetOptFit(1111);
+  return 0;
+};
+
+
+Long_t Det_MWPC::process_clusterthresholdfromcharge(){
+  int* data[12]={treeRaw->ADC_C2X_L,treeRaw->ADC_C2X_R,treeRaw->ADC_C2Y_L,treeRaw->ADC_C2Y_R,treeRaw->ADC_C3X_L,treeRaw->ADC_C3X_R,treeRaw->ADC_C3Y_L,treeRaw->ADC_C3Y_R,treeRaw->ADC_C4X_L,treeRaw->ADC_C4X_R,treeRaw->ADC_C4Y_L,treeRaw->ADC_C4Y_R};
+  const double* pedValue[12]={pedValueC2XL,pedValueC2XR,pedValueC2YL,pedValueC2YR,pedValueC3XL,pedValueC3XR,pedValueC3YL,pedValueC3YR,pedValueC4XL,pedValueC4XR,pedValueC4YL,pedValueC4YR};
+  const double* pedSigma[12]={pedSigmaC2XL,pedSigmaC2XR,pedSigmaC2YL,pedSigmaC2YR,pedSigmaC3XL,pedSigmaC3XR,pedSigmaC3YL,pedSigmaC3YR,pedSigmaC4XL,pedSigmaC4XR,pedSigmaC4YL,pedSigmaC4YR};
+
+  MwpcEvent *event[12];
+  ostringstream sstr;
+  vector<int> nSt[12];
+  double *totCh[12];
+  for(int i=0;i<12;i++){
+    event[i]=new MwpcEvent(((i%4)/2*(-5)+(i/4)*(!((i%4)/2))+7)*8,!((i/4==0)&&((i%4/2))==0));
+    totCh[i]=event[i]->getClusterTotCharge(event[i],data[i],pedValue[i],pedSigma[i],0);
+    nSt[i]=event[i]->getClusterNStrip(event[i],data[i],pedValue[i],pedSigma[i],0);
+
+    for(int j=0;j<nSt[i].size();j++){
+      histMult[i]->Fill(nSt[i][j],totCh[i][j]);
+      if(nSt[i][j]==1) histSing[i]->Fill(totCh[i][j]);
+      if(nSt[i][j]==2) histDoub[i]->Fill(totCh[i][j]);
+      if(nSt[i][j]==3) histTrip[i]->Fill(totCh[i][j]);
+      if(nSt[i][j]==4) histQuar[i]->Fill(totCh[i][j]);
+      if(nSt[i][j]==5) histQuin[i]->Fill(totCh[i][j]);
+      if(nSt[i][j]==6) histSext[i]->Fill(totCh[i][j]);
+      if(nSt[i][j]==7) histSept[i]->Fill(totCh[i][j]);
+      if(nSt[i][j]==8) histOcte[i]->Fill(totCh[i][j]);
+      if(nSt[i][j]==9) histNone[i]->Fill(totCh[i][j]);
+      if(nSt[i][j]==10) histDect[i]->Fill(totCh[i][j]);
+    }
+  }
+
+  return 0;
+}
+
+Long_t Det_MWPC::done_clusterthresholdfromcharge(){
+  int temp=0;
+  TMarker *marker[12];
+ 
+  int singChargeCut[12];
+  for(int i=0;i<12;i++){
+    for(int j=0;j<3000;j++){
+      if(j==0) temp=histSing[i]->GetBinContent(j+1);
+      else{
+        if(temp>histSing[i]->GetBinContent(j+1)) temp=histSing[i]->GetBinContent(j+1);
+        else{
+          singChargeCut[i]=j;
+          break;
+       }
+      }
+    }
+  }
+
+  for(int i=0;i<12;i++){
+    marker[i]=new TMarker(singChargeCut[i]*3000/100,histSing[i]->GetBinContent(singChargeCut[i]),20);
+    marker[i]->SetMarkerSize(1.5);
+    marker[i]->SetMarkerColor(kRed);
+  }
+
+  TCanvas *canvSing=new TCanvas("Total charge distribution for Singlet","Total charge distribution for Singlet",2000,900);
+  canvSing->Divide(4,3);
+  for(int i=0;i<12;i++){
+    canvSing->cd(i+1);
+    gPad->SetLogy();
+    histSing[i]->Draw();
+   // marker[i]->Draw();
+  }
+  canvSing->SaveAs("total charge distribution for Singlet.pdf");
+
+  int doubChargeCut[12];
+  for(int i=0;i<12;i++){
+    for(int j=5;j<3000;j++){
+      if(j==5) temp=histDoub[i]->GetBinContent(j+1);
+      else{
+        if(temp>histDoub[i]->GetBinContent(j+1)) temp=histDoub[i]->GetBinContent(j+1);
+        else{
+          doubChargeCut[i]=j;
+          break;
+       }
+      }
+    }
+  } 
+
+  for(int i=0;i<12;i++){
+    marker[i]=new TMarker(doubChargeCut[i]*3000/100,histDoub[i]->GetBinContent(doubChargeCut[i]),20);
+    marker[i]->SetMarkerSize(1.5);
+    marker[i]->SetMarkerColor(kRed);
+  }
+
+  TCanvas *canvDoub=new TCanvas("Total charge distribution for Doublet","Total charge distribution for Doublet",2000,900);
+  canvDoub->Divide(4,3);
+  for(int i=0;i<12;i++){
+    canvDoub->cd(i+1);
+    gPad->SetLogy();
+    histDoub[i]->Draw();
+   // marker[i]->Draw();
+  }
+  canvDoub->SaveAs("total charge distribution for Doublet.pdf");  
+
+  int tripChargeCut[12];
+  for(int i=0;i<12;i++){
+    for(int j=5;j<3000;j++){
+      if(j==5) temp=histTrip[i]->GetBinContent(j+1);
+      else{
+        if(temp>histTrip[i]->GetBinContent(j+1)) temp=histTrip[i]->GetBinContent(j+1);
+        else{
+          tripChargeCut[i]=j;
+          break;
+       }
+      }
+    }
+  }
+
+  for(int i=0;i<12;i++){
+    marker[i]=new TMarker(tripChargeCut[i]*3000/100,histTrip[i]->GetBinContent(tripChargeCut[i]),20);
+    marker[i]->SetMarkerSize(1.5);
+    marker[i]->SetMarkerColor(kRed);
+  }
+
+  TCanvas *canvTrip=new TCanvas("Total charge distribution for Triplet","Total charge distribution for Triplet",2000,900);
+  canvTrip->Divide(4,3);
+  for(int i=0;i<12;i++){
+    canvTrip->cd(i+1);
+    gPad->SetLogy();
+    histTrip[i]->Draw();
+   // marker[i]->Draw();
+  }
+  canvTrip->SaveAs("total charge distribution for Triplet.pdf");
+
+  int quarChargeCut[12];
+  for(int i=0;i<12;i++){
+    for(int j=5;j<3000;j++){
+      if(j==5) temp=histQuar[i]->GetBinContent(j+1);
+      else{
+        if(temp>histQuar[i]->GetBinContent(j+1)) temp=histQuar[i]->GetBinContent(j+1);
+        else{
+          quarChargeCut[i]=j;
+          break;
+       }
+      }
+    }
+  }
+
+  for(int i=0;i<12;i++){
+    marker[i]=new TMarker(quarChargeCut[i]*3000/100,histQuar[i]->GetBinContent(quarChargeCut[i]),20);
+    marker[i]->SetMarkerSize(1.5);
+    marker[i]->SetMarkerColor(kRed);
+  }
+
+  TCanvas *canvQuar=new TCanvas("Total charge distribution for Quartet","Total charge distribution for Quartet",2000,900);
+  canvQuar->Divide(4,3);
+  for(int i=0;i<12;i++){
+    canvQuar->cd(i+1);
+    gPad->SetLogy();
+    histQuar[i]->Draw();
+   // marker[i]->Draw();
+  }
+  canvQuar->SaveAs("total charge distribution for Quartet.pdf");
+
+  int quinChargeCut[12];
+  for(int i=0;i<12;i++){
+    if(i==1){
+      for(int j=10;j<3000;j++){
+        if(j==10) temp=histQuin[i]->GetBinContent(j+1);
+        else{
+          if(temp>histQuin[i]->GetBinContent(j+1)) temp=histQuin[i]->GetBinContent(j+1);
+          else{
+            quinChargeCut[i]=j;
+            break;
+          }
+        }
+      }
+    }
+    else{
+      for(int j=5;j<3000;j++){
+        if(j==5) temp=histQuin[i]->GetBinContent(j+1);
+        else{
+          if(temp>histQuin[i]->GetBinContent(j+1)) temp=histQuin[i]->GetBinContent(j+1);
+          else{
+            quinChargeCut[i]=j;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  for(int i=0;i<12;i++){
+    marker[i]=new TMarker(quinChargeCut[i]*3000/100,histQuin[i]->GetBinContent(quinChargeCut[i]),20);
+    marker[i]->SetMarkerSize(1.5);
+    marker[i]->SetMarkerColor(kRed);
+  }
+
+  TCanvas *canvQuin=new TCanvas("Total charge distribution for Quintet","Total charge distribution for Quintet",2000,900);
+  canvQuin->Divide(4,3);
+  for(int i=0;i<12;i++){
+    canvQuin->cd(i+1);
+    gPad->SetLogy();
+    histQuin[i]->Draw();
+   // marker[i]->Draw();
+  }
+  canvQuin->SaveAs("total charge distribution for Quintet.pdf");
+
+  int sextChargeCut[12];
+  for(int i=0;i<12;i++){
+    for(int j=6;j<3000;j++){
+      if(j==6) temp=histSext[i]->GetBinContent(j+1);
+      else{
+        if(temp>histSext[i]->GetBinContent(j+1)) temp=histSext[i]->GetBinContent(j+1);
+        else{
+          sextChargeCut[i]=j;
+          break;
+       }
+      }
+    }
+  }
+
+  for(int i=0;i<12;i++){
+    marker[i]=new TMarker(sextChargeCut[i]*3000/100,histSext[i]->GetBinContent(sextChargeCut[i]),20);
+    marker[i]->SetMarkerSize(1.5);
+    marker[i]->SetMarkerColor(kRed);
+  }
+
+  TCanvas *canvSext=new TCanvas("Total charge distribution for Sextet","Total charge distribution for Sextet",2000,900);
+  canvSext->Divide(4,3);
+  for(int i=0;i<12;i++){
+    canvSext->cd(i+1);
+    gPad->SetLogy();
+    histSext[i]->Draw();
+   // marker[i]->Draw();
+  }
+  canvSext->SaveAs("total charge distribution for Sextet.pdf");
+
+  int septChargeCut[12];
+  for(int i=0;i<12;i++){
+    for(int j=8;j<3000;j++){
+      if(j==8) temp=histSept[i]->GetBinContent(j+1);
+      else{
+        if(temp>histSept[i]->GetBinContent(j+1)) temp=histSept[i]->GetBinContent(j+1);
+        else{
+          septChargeCut[i]=j;
+          break;
+       }
+      }
+    }
+  }
+
+  for(int i=0;i<12;i++){
+    marker[i]=new TMarker(septChargeCut[i]*3000/100,histSept[i]->GetBinContent(septChargeCut[i]),20);
+    marker[i]->SetMarkerSize(1.5);
+    marker[i]->SetMarkerColor(kRed);
+  }
+
+  TCanvas *canvSept=new TCanvas("Total charge distribution for Septet","Total charge distribution for Septet",2000,900);
+  canvSept->Divide(4,3);
+  for(int i=0;i<12;i++){
+    canvSept->cd(i+1);
+    gPad->SetLogy();
+    histSept[i]->Draw();
+   // marker[i]->Draw();
+  }
+  canvSept->SaveAs("total charge distribution for Septet.pdf");
+
+  int octeChargeCut[12];
+  for(int i=0;i<12;i++){
+    for(int j=8;j<3000;j++){
+      if(j==8) temp=histOcte[i]->GetBinContent(j+1);
+      else{
+        if(temp>histOcte[i]->GetBinContent(j+1)) temp=histOcte[i]->GetBinContent(j+1);
+        else{
+          octeChargeCut[i]=j;
+          break;
+       }
+      }
+    }
+  }
+
+  for(int i=0;i<12;i++){
+    marker[i]=new TMarker(octeChargeCut[i]*3000/100,histOcte[i]->GetBinContent(octeChargeCut[i]),20);
+    marker[i]->SetMarkerSize(1.5);
+    marker[i]->SetMarkerColor(kRed);
+  }
+
+  TCanvas *canvOcte=new TCanvas("Total charge distribution for Octet","Total charge distribution for Octet",2000,900);
+  canvOcte->Divide(4,3);
+  for(int i=0;i<12;i++){
+    canvOcte->cd(i+1);
+    gPad->SetLogy();
+    histOcte[i]->Draw();
+   // marker[i]->Draw();
+  }
+  canvOcte->SaveAs("total charge distribution for Octet.pdf");
+
+  int noneChargeCut[12];
+  for(int i=0;i<12;i++){
+    for(int j=16;j<3000;j++){
+      if(j==16) temp=histNone[i]->GetBinContent(j+1);
+      else{
+        if(temp>histNone[i]->GetBinContent(j+1)) temp=histNone[i]->GetBinContent(j+1);
+        else{
+          noneChargeCut[i]=j;
+          break;
+       }
+      }
+    }
+  }
+
+  for(int i=0;i<12;i++){
+    marker[i]=new TMarker(noneChargeCut[i]*3000/100,histNone[i]->GetBinContent(noneChargeCut[i]),20);
+    marker[i]->SetMarkerSize(1.5);
+    marker[i]->SetMarkerColor(kRed);
+  }
+
+  TCanvas *canvNone=new TCanvas("Total charge distribution for Nonet","Total charge distribution for Nonet",2000,900);
+  canvNone->Divide(4,3);
+  for(int i=0;i<12;i++){
+    canvNone->cd(i+1);
+    gPad->SetLogy();
+    histNone[i]->Draw();
+   // marker[i]->Draw();
+  }
+  canvNone->SaveAs("total charge distribution for Nonet.pdf");
+
+  int dectChargeCut[12];
+  for(int i=0;i<12;i++){
+    for(int j=16;j<3000;j++){
+      if(j==16) temp=histDect[i]->GetBinContent(j+1);
+      else{
+        if(temp>histDect[i]->GetBinContent(j+1)) temp=histDect[i]->GetBinContent(j+1);
+        else{
+          dectChargeCut[i]=j;
+          break;
+       }
+      }
+    }
+  }
+
+  for(int i=0;i<12;i++){
+    marker[i]=new TMarker(dectChargeCut[i]*3000/100,histDect[i]->GetBinContent(dectChargeCut[i]),20);
+    marker[i]->SetMarkerSize(1.5);
+    marker[i]->SetMarkerColor(kRed);
+  }
+
+  TCanvas *canvDect=new TCanvas("Total charge distribution for Dectet","Total charge distribution for Dectet",2000,900);
+  canvDect->Divide(4,3);
+  for(int i=0;i<12;i++){
+    canvDect->cd(i+1);
+    gPad->SetLogy();
+    histDect[i]->Draw();
+   // marker[i]->Draw();
+  }
+  canvDect->SaveAs("total charge distribution for Dectet.pdf");
+
+  int ChargeCut[12][10];
+
+  ofstream output("MwpcClusterThresholdFromCharge.h");
+  output<<"const double singChargeCut[12]={";
+  for(int j=0;j<12;j++){
+    ChargeCut[j][0]=singChargeCut[j]*3000/100;
+    if(j<11)
+      output<<singChargeCut[j]*3000/100<<", ";
+    else
+      output<<singChargeCut[j]*3000/100<<"};"<<endl;
+  }
+
+  output<<"const double doubChargeCut[12]={";
+  for(int j=0;j<12;j++){
+    ChargeCut[j][1]=doubChargeCut[j]*3000/100;
+    if(j<11)
+      output<<doubChargeCut[j]*3000/100<<", ";
+    else
+      output<<doubChargeCut[j]*3000/100<<"};"<<endl;
+  }
+
+  output<<"const double tripChargeCut[12]={";
+  for(int j=0;j<12;j++){
+    ChargeCut[j][2]=tripChargeCut[j]*3000/100;
+    if(j<11)
+      output<<tripChargeCut[j]*3000/100<<", ";
+    else
+      output<<tripChargeCut[j]*3000/100<<"};"<<endl;
+  }
+
+  output<<"const double quarChargeCut[12]={";
+  for(int j=0;j<12;j++){
+    ChargeCut[j][3]=quarChargeCut[j]*3000/100;
+    if(j<11)
+      output<<quarChargeCut[j]*3000/100<<", ";
+    else
+      output<<quarChargeCut[j]*3000/100<<"};"<<endl;
+  }
+
+  output<<"const double quinChargeCut[12]={";
+  for(int j=0;j<12;j++){
+    ChargeCut[j][4]=quinChargeCut[j]*3000/100;
+    if(j<11)
+      output<<quinChargeCut[j]*3000/100<<", ";
+    else
+      output<<quinChargeCut[j]*3000/100<<"};"<<endl;
+  }
+
+  output<<"const double sextChargeCut[12]={";
+  for(int j=0;j<12;j++){
+    ChargeCut[j][5]=sextChargeCut[j]*3000/100;
+    if(j<11)
+      output<<sextChargeCut[j]*3000/100<<", ";
+    else
+      output<<sextChargeCut[j]*3000/100<<"};"<<endl;
+  }
+
+  output<<"const double septChargeCut[12]={";
+  for(int j=0;j<12;j++){
+    ChargeCut[j][6]=septChargeCut[j]*3000/100;
+    if(j<11)
+      output<<septChargeCut[j]*3000/100<<", ";
+    else
+      output<<septChargeCut[j]*3000/100<<"};"<<endl;
+  }
+
+  output<<"const double octeChargeCut[12]={";
+  for(int j=0;j<12;j++){
+    ChargeCut[j][7]=octeChargeCut[j]*3000/100;
+    if(j<11)
+      output<<octeChargeCut[j]*3000/100<<", ";
+    else
+      output<<octeChargeCut[j]*3000/100<<"};"<<endl;
+  }
+
+  output<<"const double noneChargeCut[12]={";
+  for(int j=0;j<12;j++){
+    ChargeCut[j][8]=noneChargeCut[j]*3000/100;
+    if(j<11)
+      output<<noneChargeCut[j]*3000/100<<", ";
+    else
+      output<<noneChargeCut[j]*3000/100<<"};"<<endl;
+  }
+
+  output<<"const double dectChargeCut[12]={";
+  for(int j=0;j<12;j++){
+    ChargeCut[j][9]=dectChargeCut[j]*3000/100;
+    if(j<11)
+      output<<dectChargeCut[j]*3000/100<<", ";
+    else
+      output<<dectChargeCut[j]*3000/100<<"};"<<endl;
+  }
+  output.close();
+
+  int x[10];
+  for(int i=0;i<10;i++){
+     x[i]=i+1; 
+  }
+
+  ostringstream sstr_title;
+  TGraph *gr[12];
+  for(int i=0;i<12;i++){
+    gr[i]=new TGraph(10,x,ChargeCut[i]);
+    sstr_title<<"Cut of total charge vs culster's type for MwpcC"<<i/4+2<<(char)((i%4)/2+88)<<(char)((i%4%2)*6+76);
+    gr[i]->SetTitle(sstr_title.str().c_str());
+    sstr_title.str("");
+    gr[i]->GetXaxis()->SetTitle("Number of Strips for a clusters");
+    gr[i]->GetXaxis()->SetLimits(0,11);
+    
+    gr[i]->GetYaxis()->SetTitle("Cut of total charge");
+    gr[i]->SetMinimum(0);
+    gr[i]->SetMaximum(1000);
+
+    gr[i]->SetMarkerSize(1.5);
+    gr[i]->SetMarkerColor(kRed);
+  }
+
+  TF1 *func[12];
+  ostringstream sstr;
+  for(int i=0;i<12;i++){
+    sstr<<"func"<<i;
+    if(i==1) func[i]=new TF1(sstr.str().c_str(),"[0]+[1]*x",2.5,5.5);
+    else if(i==9) func[i]=new TF1(sstr.str().c_str(),"[0]+[1]*x",1.5,4.5);
+    else func[i]=new TF1(sstr.str().c_str(),"[0]+[1]*x",1.5,5.5);
+    sstr.str("");
+  }
+    
+  TCanvas *canv=new TCanvas("Cut of total charge vs culster's type","Cut of total charge vs culster's type",2000,900);
+  canv->Divide(4,3);
+  for(int i=0;i<12;i++){
+    canv->cd(i+1);
+    sstr<<"func"<<i;
+    gr[i]->Fit(sstr.str().c_str(),"R");
+    gr[i]->GetFunction(sstr.str().c_str())->SetLineColor(kBlack); 
+    sstr.str("");
+    gr[i]->Draw("ap");
+  }
+  canv->SaveAs("Cut of total charge vs culster's type.pdf");
+
+  double ChargeCutCalc[12][10];
+  for(int i=0;i<12;i++){
+    for(int j=0;j<10;j++){
+      ChargeCutCalc[i][j]=func[i]->Eval(j+1);
+    }
+  }   
+  
+  TLine *line[12][10];
+  for(int i=0;i<12;i++){
+    for(int j=0;j<10;j++){ 
+      line[i][j]=new TLine(0.5+j,ChargeCutCalc[i][j],1.5+j,ChargeCutCalc[i][j]);
+      line[i][j]->SetLineColor(kRed);
+    }
+  }
+
+  TCanvas *canvMult=new TCanvas("Charge vs cluster's type","Charge vs cluster's type",2000,900);
+  canvMult->Divide(4,3);
+  for(int i=0;i<12;i++){
+    canvMult->cd(i+1);
+    gPad->SetLogz();
+    histMult[i]->GetXaxis()->SetLabelOffset(99);
+    histMult[i]->GetXaxis()->SetTitleOffset(0.5);
+    histMult[i]->GetXaxis()->SetTitleSize(0.06);
+    histMult[i]->GetYaxis()->SetLabelSize(0.06);
+    histMult[i]->GetYaxis()->SetTitleOffset(0.8);
+    histMult[i]->GetYaxis()->SetTitleSize(0.06);
+    histMult[i]->GetZaxis()->SetLabelSize(0.045);
+    histMult[i]->Draw("colz");
+    for(int j=0;j<10;j++){
+      line[i][j]->Draw();
+    }
+    double x, y;
+    string type[10]={"S","D","T","Qa","Qi","Sx","Sp","Oc","No","Dc"};
+    y = gPad->GetUymin() + 1*histMult[i]->GetYaxis()->GetBinWidth(1);
+    TText t;
+    t.SetTextAngle(60);
+    t.SetTextSize(0.06);
+    t.SetTextAlign(33);
+    t.SetTextColor(kRed);
+    for (int j=0;j<10;j++) {
+      x = histMult[j]->GetXaxis()->GetBinCenter(j+1);
+      t.DrawText(x,y,type[j].c_str());
+    }
+  }
+  canvMult->SaveAs("Charge vs cluster's type.pdf");
+  
+
+  return 0;
+};

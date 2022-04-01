@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<checkToF>
+  <!-- Default values -->
+  <config>
+    <tofDiff>set_tofDiff</tofDiff>
+  </config>
+ <date time="2016-03-28T00:00:00">
+   <tofDiff id="0">13.4787</tofDiff>
+   <tofDiff id="12">15.6799</tofDiff>
+   <tofDiff id="1">15.9507</tofDiff>
+   <tofDiff id="13">15.9297</tofDiff>
+   <tofDiff id="2">10.6808</tofDiff>
+   <tofDiff id="14">12.0737</tofDiff>
+   <tofDiff id="3">13.3133</tofDiff>
+   <tofDiff id="15">14.8448</tofDiff>
+   <tofDiff id="4">12.1508</tofDiff>
+   <tofDiff id="16">15.8257</tofDiff>
+   <tofDiff id="5">10.6134</tofDiff>
+   <tofDiff id="17">14.6181</tofDiff>
+   <tofDiff id="6">13.5038</tofDiff>
+   <tofDiff id="18">16.101</tofDiff>
+   <tofDiff id="7">12.6418</tofDiff>
+   <tofDiff id="19">14.1071</tofDiff>
+   <tofDiff id="8">12.3235</tofDiff>
+   <tofDiff id="20">18.1392</tofDiff>
+   <tofDiff id="9">0</tofDiff>
+   <tofDiff id="21">15.8039</tofDiff>
+   <tofDiff id="10">12.0829</tofDiff>
+   <tofDiff id="22">14.2999</tofDiff>
+   <tofDiff id="11">10.6752</tofDiff>
+   <tofDiff id="23">12.7618</tofDiff>
+ </date>
+</checkToF>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cooker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation='recipe.xsd'>
+
+<init>/${HOME}/.cooker/shared/init/demo.xml</init>
+
+<source>RawEvent</source> <!-- the source tree name-->
+<destination>CookedPgC</destination> <!-- the destination tree name-->
+
+<plugins>
+  <plugin> 
+     <name>PgC</name>
+     <file>libPgC</file>
+  </plugin>
+
+
+</plugins>
+
+<defineHistograms>
+ <PgC>conversionPgC_histos</PgC>
+</defineHistograms>
+
+
+<!-- These functions will be called at the beginning --> 
+<startup>
+ <PgC>conversionPgC_begin</PgC>
+</startup>
+
+<!-- These functions will be executed for every event, in order of appearance -->
+<!--execute>
+ <PgC>process_ped</PgC>
+</execute-->
+<execute>
+ <PgC>conversionPgC_calib</PgC>
+</execute>
+
+
+<!-- These functions will be called at the end of the file --> 
+
+</cooker>

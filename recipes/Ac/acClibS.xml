@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cooker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation='recipe.xsd'>
+
+<init>/${HOME}/.cooker/shared/init/demo.xml</init>
+
+<source>RawEvent</source> <!-- the source tree name-->
+<destination>ac_calibS</destination> <!-- the destination tree name-->
+
+<plugins>
+  <plugin> 
+     <name>tutorial</name>
+     <file>libtutorial</file>
+  </plugin>
+
+
+</plugins>
+
+
+<defineHistograms>
+ <tutorial>hist_calibS</tutorial>
+</defineHistograms>
+
+<!-- These functions will be called at the beginning --> 
+<startup>
+ <tutorial>start_calibS</tutorial>
+</startup>
+
+<!-- These functions will be executed for every event, in order of appearance -->
+<execute>
+ <tutorial>calib_peakS</tutorial>
+</execute>
+
+<!-- These functions will be called at the end of the file --> 
+<finalize>
+ <tutorial>done_calibS</tutorial>
+</finalize>
+
+</cooker>

@@ -1,0 +1,36 @@
+//
+void findMaximum(vector<double>array, int size, int *index, double *max);
+void kera()  
+{   
+  int index; double max;   
+  vector<double>array;      
+  for(int j=0;j<7;j++)   
+    {       
+      array[j]=500.0-j;       
+      array.push_back(500-j);    
+      cout<<array[j]<<endl;   
+    }   
+  int size=size(array);   
+  int size = array.size();  
+  cout<<"  arrayyy     "<<size<<endl;    
+  findMaximum(array, size, &index,&max);   
+  array.clear();
+  cout<<" Largest "<<max << "   "<< index<< endl;  
+}   				   				   
+ 
+				                             
+void findMaximum( vector<double>num, int size, int *index, double *max) {   
+  for (int i=0;i<size;i++)    
+    {       
+      if(num[0]<num[i]) 	
+	{ 
+	  num[0]=num[i]; 	*index=i; 	*max=num[0]; 
+	}     
+      else 	{ 
+	*max=num[0];        
+	*index=0; 
+      }    
+    }     
+ 
+
+}

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cooker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation='recipe.xsd'>
+
+<init>/${HOME}/.cooker/shared/init/demo.xml</init>
+
+<source>RawTof1</source> <!-- the source tree name-->
+<destination>CaliTof1</destination> <!-- the destination tree name-->
+
+<plugins>
+  <plugin> 
+     <name>ToF1</name>
+     <file>libToF1</file>
+  </plugin>
+
+
+</plugins>
+
+
+<defineHistograms>
+ <ToF1>histos</ToF1>
+</defineHistograms>
+
+<!-- These functions will be called at the beginning --> 
+<startup>
+ <ToF1>startup</ToF1>
+</startup>
+
+<!-- These functions will be executed for every event, in order of appearance -->
+<execute>
+ <ToF1>process</ToF1>
+</execute>
+
+<!-- These functions will be called at the end of the file --> 
+<finalize>
+ <ToF1>done</ToF1>
+</finalize>
+
+</cooker>

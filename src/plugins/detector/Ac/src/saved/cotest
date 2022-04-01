@@ -1,0 +1,94 @@
+#include <Det_Ac.h>
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <algorithm>
+#include <TStyle.h>
+#include <string>
+#include <TSpectrum.h>
+#include <TH1D.h>
+#include <TDirectory.h>
+#include <TList.h>
+
+using namespace std;
+
+
+Long_t Det_Ac::startup_conversionAc()
+{
+  getBranchObject("RawACInfo",(TObject **) &treeRaw);
+  treeCali=new CRTCaliAc();
+
+  // Make new branch on output tree                                                            
+  makeBranch("AcAdc",(TObject **)&treeCali);
+
+  return 0;
+};
+
+
+Long_t Det_Ac::process_conversionAc()
+{
+
+
+Int_t Run;
+Double_t U1, U2, U3, U4, U5, U6, U7, U8, U9, U10, U11, U12;
+
+//ifstream infile;
+//"pedRun"+std::to_string(runNo)+"D.txt", ios::app
+//infile.open(Form("/data/trek/E36/gautam/crnRoot/cooker/datfiles/pedestal_run/ProRun3994U.txt"));
+
+//infile.open(Form("/data/trek/E36/gautam/crnRoot/cooker/datfiles/Pro_run/ProRun%dU.txt",runNo));
+
+//cout<<Form("%d.txt",runNo)<<endl;
+//infile.open("/data/trek/E36/gautam/crnRoot/cooker/datfiles/Pro_run/ProRun"+std::to_string(runNo)+"U.txt");
+//infile>>fixed>>Run>>U1>>U2>>U3>>U4>>U5>>U6>>U7>>U8>>U9>>U10>>U11>>U12;
+//cout<<" U1:  "<<U1<<"  U2:  "<<U2<<endl;
+//infile.close();
+
+
+
+
+
+/*ifstream infile1(Form("/data/trek/E36/gautam/crnRoot/cooker/datfiles/pedestal_run/ProRun3397D.txt",runNo));
+infile>>fixed>>Run>>D1>>D2>>D3>>D4>>D5>>D6>>D7>>D8>>D9>>D10>>D11>>D12;
+cout<<"RunNo:  "<<Run<<"  U1: "<<D1<<endl;
+infile.close();
+
+
+
+
+  treeCali->run=treeRaw->run;
+  treeCali->event=treeRaw->event;
+  treeCali->adcU.clear();
+  treeCali->adcD.clear();
+  UInt_t nGap=0;
+  for(int iAc=0;iAc<12;iAc++){
+ 
+      Float_t myAdcU=myAdcU + treeRaw->ADC_ACU[iAc]-listPedestal[iAc];
+      Float_t myAdcD=myAdcD + treeRaw->ADC_ACD[iAc]-listPedestal[iAc+12];
+      h1ADC->Fill(myAdcU);
+      h1ADC->Fill(myAdcD);
+      nGap++;
+      treeCali->adcU.push_back(myAdcU);
+      treeCali->adcD.push_back(myAdcD);
+      
+    }*/
+//  }
+  return 0;
+};
+
+Long_t Det_Ac::calib_conversionAc(){
+
+
+  return 0;
+
+
+}
+
+Long_t Det_Ac::done_conversionAc()
+{
+
+int runNo = treeRaw->run;
+//cout<<"  Run:  "<<runNo<<endl;
+
+//  return 0;
+};

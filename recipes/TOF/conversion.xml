@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cooker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation='recipe.xsd'>
+
+<init>/${HOME}/.cooker/shared/init/demo.xml</init>
+
+<source>RawEvent</source> <!-- the source tree name-->
+<destination>CaliTof</destination> <!-- the destination tree name-->
+
+<plugins>
+  <plugin> 
+     <name>ToF1</name>
+     <file>libToF1</file>
+  </plugin>
+  <plugin> 
+     <name>ToF2</name>
+     <file>libToF2</file>
+  </plugin>
+
+
+</plugins>
+
+
+<defineHistograms>
+ <ToF1>histos_conversion</ToF1>
+ <ToF2>histos_conversion</ToF2>
+</defineHistograms>
+
+<!-- These functions will be called at the beginning --> 
+<startup>
+ <ToF1>startup_conversion</ToF1>
+ <ToF2>startup_conversion</ToF2>
+</startup>
+
+<!-- These functions will be executed for every event, in order of appearance -->
+<execute>
+ <ToF1>process_conversion</ToF1>
+ <ToF2>process_conversion</ToF2>
+</execute>
+
+<!-- These functions will be called at the end of the file --> 
+<finalize>
+ <ToF1>done_conversion</ToF1>
+ <ToF2>done_conversion</ToF2>
+</finalize>
+
+</cooker>

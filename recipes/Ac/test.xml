@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cooker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation='recipe.xsd'>
+
+<init>/${HOME}/.cooker/shared/init/demo.xml</init>
+
+<source>TOF1Par:TOF2Par</source> <!-- the source tree name -->
+<destination>ac_cali</destination> <!-- the destination tree name -->
+
+<plugins>
+  <plugin>
+     <name>Ac</name>
+     <file>libAc</file>
+  </plugin>
+
+
+</plugins>
+
+
+<defineHistograms>
+ <Ac>histos</Ac>
+</defineHistograms>
+
+<!-- these functions will be called at the beginning -->
+<startup>
+ <Ac>startup</Ac>
+</startup>
+
+<!-- these functions will be executed for evey event in order of appearance -->
+<execute>
+ <Ac>process</Ac>
+</execute>
+
+<execute>
+ <Ac>calib</Ac>
+</execute>
+
+
+<!-- these functions will be called at the end of the file -->
+<finalize>
+ <Ac>done</Ac>
+</finalize>
+
+</cooker>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cooker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation='recipe.xsd'>
+
+<init>/${HOME}/.cooker/shared/init/demo.xml</init>
+
+<source>RawEvent</source> <!-- the source tree name-->
+<destination>CookedAc</destination> <!-- the destination tree name-->
+
+<plugins>
+  <plugin> 
+     <name>Ac</name>
+     <file>libAc</file>
+  </plugin>
+
+
+</plugins>
+
+<defineHistograms>
+ <Ac>conversionAc_histos</Ac>
+</defineHistograms>
+
+
+<!-- These functions will be called at the beginning --> 
+<startup>
+ <Ac>conversionAc_begin</Ac>
+</startup>
+
+<!-- These functions will be executed for every event, in order of appearance -->
+<!--execute>
+ <Ac>process_ped</Ac>
+</execute-->
+<execute>
+ <Ac>conversionAc_calib</Ac>
+</execute>
+
+
+<!-- These functions will be called at the end of the file --> 
+
+</cooker>

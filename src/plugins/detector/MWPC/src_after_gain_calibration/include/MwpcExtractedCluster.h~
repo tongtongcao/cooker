@@ -1,0 +1,36 @@
+#ifndef __MWPC_EXTRACTED_CLUSTER__
+#define __MWPC_EXTRACTED_CLUSTER__
+#include <string>
+#include <TDirectory.h>
+#include "cookerrawtree.h"
+#include <TList.h>
+#include <vector>
+using namespace std;
+
+class MwpcExtractedCluster:public CRTBase{
+  public:
+    UInt_t run;
+    UInt_t event; 
+    UInt_t numClusterXNoCut[6];
+    UInt_t numClusterYNoCut[6];
+    UInt_t numClusterXThresholdTotalChargeCut[6];
+    UInt_t numClusterYThresholdTotalChargeCut[6];
+    UInt_t numClusterXThresholdTotalChargeFlagCut[6];
+    UInt_t numClusterYThresholdTotalChargeFlagCut[6];
+    UInt_t numPair[6]; // Number of pairs
+    bool pairFlag[6]; //Flag of detector
+    ///// Following variables record information of all pairs which mean combinations of clusters in X and Y directions. To record X and Y information together, informaiton of Y is next to X.
+    vector<UInt_t> pairNum[6]; // Cluster number for all pairs
+    vector<UInt_t> numSt[6]; // Number of strips for all pairs
+    vector<vector<int> > stNum[6]; // Strip number of each cluster for all pairs 
+    vector<vector<double> >stCharge[6]; // Strip charge of each cluster for all piars
+    vector<double> posCentroid[6];
+    vector<double> posErrCentroid[6];
+
+    void clearVector();
+    MwpcExtractedCluster();
+    virtual ~MwpcExtractedCluster();
+    ClassDef(MwpcExtractedCluster,1);
+};
+
+#endif
